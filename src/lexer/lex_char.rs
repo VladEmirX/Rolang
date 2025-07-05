@@ -1,4 +1,3 @@
-use bitflags::parser::to_writer;
 use crate::lexer::{CharErrorFlags, State, Token, TokenIterator, TokenType};
 use crate::lexer::lex::{is_alnum, skip_while_alnum};
 
@@ -147,18 +146,21 @@ pub fn lex_char(it: &mut TokenIterator, start : State) -> Token {
             } else {
                 line.len()
             };
-
-            //todo: change behaviour
+            
             Token {
                 slice: line.slice(num..slice_end),
                 row,
                 col,
                 num,
-                ty: TokenType::Character {
-                    value: fst_char,
-                    prefix_len,
-                    suffix_len: slice_end - fst_num,
-                    errors: CharErrorFlags::SINGLE,
+                ty: if prefix_len == 0 {
+                    TokenType::Argument(line.slice(fst_num..slice_end))    
+                } else {
+                    TokenType::Character {
+                        value: fst_char,
+                        prefix_len,
+                        suffix_len: slice_end - fst_num,
+                        errors: CharErrorFlags::SINGLE,
+                    }
                 },
             }
         }

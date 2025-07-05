@@ -30,8 +30,9 @@ pub struct Token{
 #[derive(Debug, Clone)]
 pub enum TokenType{
     Open, Close, Operator, Comma, Semicolon, Sharp,
-    Symbol{identifier: ImStr},
-    Keyword{identifier: ImStr},
+    Symbol(ImStr),
+    Keyword(ImStr),
+    Argument(ImStr),
     Character{value: char, prefix_len: usize, suffix_len: usize, errors: CharErrorFlags},
     String{value: StringValue, quote_count: usize, prefix_len: usize, suffix_len: usize, errors: StringErrorFlags},
     Number{start_pos: usize, dot_pos: Option<usize>, exp_pos: Option<usize>, suf_pos: Option<usize>, errors: NumberErrorFlags},

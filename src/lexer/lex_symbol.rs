@@ -1,4 +1,3 @@
-use unicode_properties::{GeneralCategoryGroup, UnicodeGeneralCategory};
 use crate::lexer::{is_keyword, skip_while_alnum, State, Token, TokenIterator};
 use crate::lexer::lex_char::lex_char;
 use crate::lexer::lex_string::lex_string;
@@ -35,8 +34,8 @@ pub fn lex_symbol(it: &mut TokenIterator) -> Token {
             let prefix = &line[num..sharp_num];
             Token {
                 ty: match prefix {
-                    "k" => Keyword { identifier },
-                    "r" => Symbol { identifier },
+                    "k" => Keyword (identifier),
+                    "r" => Symbol (identifier),
                     _ => Error
                 },
                 slice,
@@ -49,8 +48,8 @@ pub fn lex_symbol(it: &mut TokenIterator) -> Token {
             let slice = slice(&it.current) ;
             Token{
                 ty: if is_keyword(slice.as_str()) {
-                    Keyword{ identifier: slice.clone()}
-                } else {Symbol{identifier: slice.clone()}},
+                    Keyword( slice.clone())
+                } else {Symbol( slice.clone())},
                 slice,
                 row,
                 col,

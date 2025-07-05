@@ -15,18 +15,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d3441deb04ea9c6b472f313be54d585428cd6a68cdb8dcf40cf43744bec78fe"
 
 [[package]]
-name = "maplit"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
-
-[[package]]
 name = "rolang"
 version = "0.0.0"
 dependencies = [
  "bitflags",
  "imstr",
- "maplit",
  "unicode-properties",
 ]
 
