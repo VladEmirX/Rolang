@@ -1,4 +1,3 @@
-use unicode_properties::{GeneralCategoryGroup, UnicodeGeneralCategory};
 use crate::lexer::{skip_while_alnum, NumberErrorFlags, State, Token, TokenIterator};
 use crate::lexer::lex::is_alnum;
 use crate::lexer::TokenType::Number;
@@ -25,7 +24,7 @@ pub fn lex_number(it: &mut TokenIterator) -> Token {
 
     // <0>.<1>e<2>
     let mut stage = 0;
-    let mut has_digit = [Some(false), None, None];
+    let mut has_digit = [Some(fst_ch != '0'), None, None];
 
 
     'parse_loop: while let Some(State{char,  num: curr_num @ 1.., ..}) = it.current {
@@ -72,7 +71,7 @@ pub fn lex_number(it: &mut TokenIterator) -> Token {
         };
     };
 
-    if let Some(State { num: curr_num @ 1.., char, .. }) 
+    if let Some(State { num: curr_num @ 1.., .. }) 
         = it.current.filter(|s| is_alnum(s.char)) {
         suf_pos = Some(curr_num);
         skip_while_alnum(it);

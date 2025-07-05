@@ -1,7 +1,7 @@
-use std::rc::Rc;
+use std::ops::Index;
 use crate::lexer::{Token, TokenIterator, State};
 use unicode_properties::*;
-use crate::{ImStr};
+use crate::ImStr;
 use crate::lexer::lex_char::lex_char;
 use crate::lexer::lex_number::lex_number;
 use crate::lexer::lex_operator::lex_operator;
@@ -10,22 +10,29 @@ use crate::lexer::lex_symbol::lex_symbol;
 use crate::lexer::TokenType::*;
 
 
-impl From<&ImStr> for TokenIterator {
-    fn from(str: &ImStr) -> TokenIterator {
-        assert!(!str.is_empty());
+
+impl TokenIterator {
+    pub fn new(mut str: &str) -> Self {     
+        if str.is_empty() {
+            str = " ";
+        }
+        
+        let lines : Vec<_> = str
+            .lines()
+            .map(|str| ImStr::from(" ".to_string() + str.trim_end()))
+            .collect();
+        
         
         let mut result = TokenIterator{
-            lines: str.lines().map(|str| ImStr::trim_end(&str)).collect(),
             row: 0,
-            iter: ImStr::default().char_indices().enumerate(),
+            iter: lines[0].char_indices().enumerate(),
+            lines,
             current: None,
         };
         result.next_char();
         result
     }
-}
-
-impl TokenIterator {
+    
     pub(super) fn next_char(&mut self) -> &mut Self {
         loop {
             if let Some((col, (num, char))) = self.iter.next() {
@@ -60,7 +67,10 @@ impl TokenIterator {
     }
     
     #[inline]
-    pub(super) fn lines(&self) -> &Rc<[ImStr]> {&self.lines}
+    #[allow(unused)]
+    pub(super) fn lines(&self) -> &(impl IntoIterator + Index<usize>) {
+        &self.lines
+    }
 }
 
 impl Iterator for TokenIterator {

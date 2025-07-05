@@ -1,5 +1,3 @@
-use std::rc::Rc;
-use unicode_properties::UnicodeGeneralCategory;
 use crate::lexer::{State, StringErrorFlags, StringValue, Token, TokenIterator, TokenType};
 use crate::lexer::lex::skip_while_alnum;
 

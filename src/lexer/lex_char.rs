@@ -159,7 +159,7 @@ pub fn lex_char(it: &mut TokenIterator, start : State) -> Token {
                         value: fst_char,
                         prefix_len,
                         suffix_len: slice_end - fst_num,
-                        errors: CharErrorFlags::SINGLE,
+                        errors: CharErrorFlags::UNCLOSED,
                     }
                 },
             }

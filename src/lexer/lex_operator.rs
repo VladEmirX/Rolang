@@ -3,7 +3,7 @@ use crate::lexer::lex::skip_while_op;
 use crate::lexer::TokenType::Operator;
 
 pub fn lex_operator(it: &mut TokenIterator) -> Token {
-    let Some(state @ State{num, col, ..}) = it.current
+    let Some(State{num, col, ..}) = it.current
         else { unreachable!() };
     let row = it.row;
     let line = it.lines[row].clone();

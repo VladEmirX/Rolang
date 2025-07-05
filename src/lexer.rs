@@ -1,10 +1,8 @@
-pub use self::lex::*;
+use self::lex::*;
 use std::iter::Enumerate;
-use std::rc::Rc;
 use crate::{ImStr, ImStrData};
 use std::ops::Range;
 use bitflags::bitflags;
-use unicode_properties::UnicodeGeneralCategory;
 
 mod lex;
 mod lex_number;
@@ -43,7 +41,7 @@ pub enum TokenType{
 
 #[derive(Debug, Clone)]
 pub struct TokenIterator{
-    lines: Rc<[ImStr]>,
+    lines: Vec<ImStr>,
     row: usize,
     iter: Enumerate<imstr::string::CharIndices<ImStrData>>,
     current: Option<State>,
@@ -122,11 +120,10 @@ bitflags! {
     pub struct CharErrorFlags: u8 {
         const UNCLOSED = 0b0000_0001;
         const EMPTY = 0b0000_0010;
-        const SINGLE = 0b0000_0100;
-        const BAD_ESC_SEQUENCE = 0b0000_1000;
-        const INVALID_CODEPOINT = 0b0001_0000;
+        const BAD_ESC_SEQUENCE = 0b0000_0100;
+        const INVALID_CODEPOINT = 0b0000_1000;
 
-        const _ = 0b0001_1111;
+        const _ = 0b0000_1111;
     }
 }
 
