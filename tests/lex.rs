@@ -77,7 +77,8 @@ fn test_full_expression() {
 #[test]
 fn test_identifiers() {
     assert!(matches!(lex_one("foo"), TokenType::Symbol{ .. }));
-    assert!(matches!(lex_one("if"), TokenType::Keyword( identifier ) if identifier.as_str()=="if"));
+    assert!(matches!(lex_one("then"), TokenType::Keyword( identifier ) if identifier.as_str()=="then"));
+    assert!(matches!(lex_one("k#if"), TokenType::Keyword( identifier ) if identifier.as_str()=="if"));
     assert!(matches!(lex_one("_x1"), TokenType::Symbol{ .. }));
 }
 
@@ -104,13 +105,12 @@ fn test_operators() {
 fn test_characters() {
     assert!(matches!(lex_one("'a'"), TokenType::Character{ value: 'a', errors, .. } if errors.is_empty()));
     assert!(matches!(lex_one("'\\n'"), TokenType::Character{ value: '\n', .. }));
-    assert!(matches!(lex_one("'\\999'"), TokenType::Character{ errors: e, .. } if e.contains(CharErrorFlags::BAD_ESC_SEQUENCE)));
+    assert!(matches!(lex_one("'\\o999'"), TokenType::Character{ errors: e, .. } if e.contains(CharErrorFlags::BAD_ESC_SEQUENCE)));
 }
 
 #[test]
 fn test_strings_2() {
     assert!(matches!(lex_one("\"hello\""), TokenType::String{ value: StringValue::SingleLine(s), .. } if s.as_str()=="hello"));
-    assert!(matches!(lex_one("\"\"\"multi\nline\"\"\""), TokenType::String{ value: StringValue::MultiLine{..}, .. }));
-    
-    
+    assert!(matches!(lex_one("\"\"\"bad multi\nline\"\"\""), TokenType::String{ value: StringValue::SingleLine{..}, errors, .. } if errors.contains(StringErrorFlags::UNCLOSED)));
+    assert!(matches!(lex_one("\"\"\"\nmulti\nline\"\"\""), TokenType::String{ value: StringValue::MultiLine{..}, .. }));
 }

@@ -81,7 +81,7 @@ pub fn lex_string(it: &mut TokenIterator, start : State) -> Token {
             col: start.col,
             num: start.num,
             ty: TokenType::String {
-                value: StringValue::SingleLine(start_line.slice(start.num + quote_count..last_pos)),
+                value: StringValue::SingleLine(start_line.slice(start.num + quote_count..last_pos - quote_count)),
                 suffix_len,
                 prefix_len,
                 errors: StringErrorFlags::empty(),

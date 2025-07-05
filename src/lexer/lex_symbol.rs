@@ -9,13 +9,11 @@ pub fn lex_symbol(it: &mut TokenIterator) -> Token {
     let row = it.row;
     let line = it.lines[row].clone();
 
-    let slice 
-        = |&mb_state|  
-        line.slice(num
-       ..if let Some(State{ num: curr_num, ..})
+    let right_bound = |mb_state|
+        if let Some(State{ num: curr_num @ 1.., ..})
             = mb_state
         { curr_num } else
-        { line.len()});
+        { line.len()};
     
     skip_while_alnum(it);
 
@@ -27,10 +25,13 @@ pub fn lex_symbol(it: &mut TokenIterator) -> Token {
             lex_char(it, start)
         }
         Some(State {char:'#', num: sharp_num, ..}) => {
+            it.next_char();
             skip_while_alnum(it);
+            
+            let rbound : usize = right_bound(it.current);
 
-            let slice = slice(&it.current) ;
-            let identifier = slice.slice(sharp_num + 1 - num ..);
+            let slice = line.slice(num .. rbound);
+            let identifier = line.slice(sharp_num + 1 .. rbound);
             let prefix = &line[num..sharp_num];
             Token {
                 ty: match prefix {
@@ -45,7 +46,7 @@ pub fn lex_symbol(it: &mut TokenIterator) -> Token {
             }
         }
         _ => {
-            let slice = slice(&it.current) ;
+            let slice = line.slice(num .. right_bound(it.current));
             Token{
                 ty: if is_keyword(slice.as_str()) {
                     Keyword( slice.clone())
