@@ -6,6 +6,15 @@ fn lex(src: &str) -> Vec<TokenType> {
     res
 }
 
+fn lex_one(src: &str) -> TokenType {
+    let mut iter = TokenIterator::new(src);
+    iter.next(); // skip indent
+    let res = iter.next().unwrap().ty;
+    dbg!(&res);
+    res
+}
+
+
 #[test]
 fn test_numbers_simple() {
     let tokens = lex("42 0xFF 0xff 0b1010 3.14 3. 1e10 1.2e-3");
@@ -42,13 +51,15 @@ fn test_strings_simple() {
 
 #[test]
 fn test_full_expression() {
-    let src = "mut x := fact 3 |> println \"Result: \" + x";
+    let src = "mut x := fact 3; println \"Result: {}\" + x";
     let tokens = lex(src);
 
-    let expected: Vec<&str> = vec![
+    let expected = [
         "Keyword", "Symbol", "Operator", "Symbol", "Number",
-        "Operator", "Symbol", "String", "Operator", "Symbol"
+        "Semicolon", "Symbol", "String", "Operator", "Symbol"
     ];
+    
+    assert_eq!(tokens.len(), expected.len());
 
     for (token, expected_str) in tokens.iter().zip(expected.iter()) {
         match (token, *expected_str) {
@@ -57,7 +68,49 @@ fn test_full_expression() {
             (TokenType::Operator, "Operator") => {}
             (TokenType::Number { .. }, "Number") => {}
             (TokenType::String { .. }, "String") => {}
+            (TokenType::Semicolon { .. }, "Semicolon") => {}
             _ => panic!("Unexpected token: {token:?}, expected {expected_str}"),
         }
     }
+}
+
+#[test]
+fn test_identifiers() {
+    assert!(matches!(lex_one("foo"), TokenType::Symbol{ .. }));
+    assert!(matches!(lex_one("if"), TokenType::Keyword( identifier ) if identifier.as_str()=="if"));
+    assert!(matches!(lex_one("_x1"), TokenType::Symbol{ .. }));
+}
+
+#[test]
+fn test_numbers_2() {
+    assert!(matches!(lex_one("123"), TokenType::Number{ dot_pos: None, exp_pos: None, .. }));
+    assert!(matches!(lex_one("0x1F"), TokenType::Number{ .. }));
+    assert!(matches!(lex_one("3.14i32"), TokenType::Number{ dot_pos: Some(_), suf_pos: Some(_), .. }));
+    assert!(matches!(lex_one("1e+10u64"), TokenType::Number{ exp_pos: Some(_), suf_pos: Some(_), .. }));
+    assert!(matches!(lex_one("0b1010"), TokenType::Number{ .. }));
+
+    let t = lex_one("0xG");
+    assert!(matches!(t, TokenType::Number{ errors, .. } if errors.contains(NumberErrorFlags::BAD_SUFFIX)))
+}
+
+#[test]
+fn test_operators() {
+    assert!(matches!(lex_one("+"), TokenType::Operator));
+    assert!(matches!(lex_one("++--"), TokenType::Operator { .. }));
+}
+
+
+#[test]
+fn test_characters() {
+    assert!(matches!(lex_one("'a'"), TokenType::Character{ value: 'a', errors, .. } if errors.is_empty()));
+    assert!(matches!(lex_one("'\\n'"), TokenType::Character{ value: '\n', .. }));
+    assert!(matches!(lex_one("'\\999'"), TokenType::Character{ errors: e, .. } if e.contains(CharErrorFlags::BAD_ESC_SEQUENCE)));
+}
+
+#[test]
+fn test_strings_2() {
+    assert!(matches!(lex_one("\"hello\""), TokenType::String{ value: StringValue::SingleLine(s), .. } if s.as_str()=="hello"));
+    assert!(matches!(lex_one("\"\"\"multi\nline\"\"\""), TokenType::String{ value: StringValue::MultiLine{..}, .. }));
+    
+    
 }
